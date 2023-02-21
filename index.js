@@ -1,23 +1,26 @@
-import express from "express";
+import express, { request } from "express";
 import cors from "cors";
-
-const requestLogger = (request, response, next) => {
-  console.log("Method:", request.method);
-  console.log("Path:  ", request.path);
-  console.log("Body:  ", request.body);
-  console.log("---");
-  next();
-};
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: "unknown endpoint" });
-};
-
+import morgan from "morgan";
 const app = express();
 
-app.use(requestLogger);
-app.use(unknownEndpoint);
-app.use(cors());
+// const requestLogger = (request, response, next) => {
+//   console.log("Method:", request.method);
+//   console.log("Path:  ", request.path);
+//   console.log("Body:  ", request.body);
+//   console.log("---");
+//   next();
+// };
+
+// const unknownEndpoint = (request, response) => {
+//   if (request.body) {
+//     response.status(200).send({ error: "unknown endpoint" });
+//   }
+// };
+
+// app.use(requestLogger);
 app.use(express.json());
+// app.use(unknownEndpoint);
+app.use(cors());
 
 let persons = [
   {
@@ -81,22 +84,32 @@ const generateId = () => {
   return Math.floor(Math.random() * 1000);
 };
 
-app.post("/api/persons", (request, response) => {
-  request.body.id = generateId();
-  const person = request.body;
-
-  const similarName = persons.find(
-    (personName) => personName.name === person.name
-  );
-
-  if (similarName) {
-    persons.push({ error: "name must be unique" });
-    response.json({ error: "name must be unique" });
-  } else {
-    persons.push(person);
-    response.json(person);
-  }
+morgan.token("body", (req) => {
+  return JSON.stringify(req.body);
 });
+
+app.post(
+  "/api/persons",
+  morgan(
+    "':method :url :status :res[content-length] - :response-time ms :body"
+  ),
+  (request, response) => {
+    request.body.id = generateId();
+    const person = request.body;
+
+    const similarName = persons.find(
+      (personName) => personName.name === person.name
+    );
+
+    if (similarName) {
+      persons.push({ error: "name must be unique" });
+      response.json({ error: "name must be unique" });
+    } else {
+      persons.push(person);
+      response.json(person);
+    }
+  }
+);
 
 const PORT = 3001;
 app.listen(PORT, () => {
