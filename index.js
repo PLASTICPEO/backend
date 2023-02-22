@@ -3,45 +3,43 @@ import cors from "cors";
 import morgan from "morgan";
 const app = express();
 
-// const requestLogger = (request, response, next) => {
-//   console.log("Method:", request.method);
-//   console.log("Path:  ", request.path);
-//   console.log("Body:  ", request.body);
-//   console.log("---");
-//   next();
-// };
+const requestLogger = (request, response, next) => {
+  console.log("Method:", request.method);
+  console.log("Path:  ", request.path);
+  console.log("Body:  ", request.body);
+  console.log("---");
+  next();
+};
 
-// const unknownEndpoint = (request, response) => {
-//   if (request.body) {
-//     response.status(200).send({ error: "unknown endpoint" });
-//   }
-// };
-
-// app.use(requestLogger);
+app.use(requestLogger);
+const unknownEndpoint = (request, response) => {
+  if (request.body) {
+    response.status(404).send("not found info");
+  }
+};
 app.use(express.json());
-// app.use(unknownEndpoint);
 app.use(cors());
 
-let persons = [
+let notes = [
   {
     id: 1,
-    name: "Arto Hellas",
-    number: "040-123456",
+    content: "HTML is easy",
+    important: true,
   },
   {
     id: 2,
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
+    content: "Browser can execute only JavaScript",
+    important: false,
   },
   {
     id: 3,
-    name: "Dan Abramov",
-    number: "12-43-234345",
+    content: "GET and POST are the most important methods of HTTP protocol",
+    important: true,
   },
   {
+    content: "JavaScrip is very good programming language",
+    important: true,
     id: 4,
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
   },
 ];
 
@@ -49,18 +47,30 @@ app.get("/", (request, response) => {
   response.send(`Hi from 3001 port`);
 });
 
-const currentDate = new Date();
-
 app.get("/info", (request, response) => {
-  response.send(`Phonebook has info for ${persons.length} people
-                <h3>${currentDate}</h3>`);
+  const currentDate = new Date();
+  response.send(
+    `Phonebook has info for ${notes.length} people <h3>${currentDate}</h3>`
+  );
 });
 
-app.get("/api/persons", (request, response) => {
-  response.send(persons);
+app.get("/api/notes", (request, response) => {
+  response.send(notes);
 });
 
-app.get("/api/persons/:id", (request, response) => {
+app.put("/api/notes/:id", (request, response) => {
+  notes = notes.map((note) => {
+    if (note.id == request.body.id) {
+      return request.body;
+    } else {
+      return note;
+    }
+  });
+
+  response.send(request.body);
+});
+
+app.get("/api/notes/:id", (request, response) => {
   const noteId = request.params.id;
   const note = persons.find((findNote) => {
     return findNote.id === Number(noteId);
@@ -73,9 +83,9 @@ app.get("/api/persons/:id", (request, response) => {
   }
 });
 
-app.delete("/api/persons/:id", (request, response) => {
+app.delete("/api/notes/:id", (request, response) => {
   const id = Number(request.params.id);
-  persons = persons.filter((note) => note.id !== id);
+  notes = persons.filter((note) => note.id !== id);
 
   response.status(204).end();
 });
@@ -89,7 +99,7 @@ morgan.token("body", (req) => {
 });
 
 app.post(
-  "/api/persons",
+  "/api/notes",
   morgan(
     "':method :url :status :res[content-length] - :response-time ms :body"
   ),
@@ -97,21 +107,23 @@ app.post(
     request.body.id = generateId();
     const person = request.body;
 
-    const similarName = persons.find(
-      (personName) => personName.name === person.name
+    const similarName = notes.find(
+      (personName) => personName.content === person.content
     );
 
     if (similarName) {
-      persons.push({ error: "name must be unique" });
+      notes.push({ error: "name must be unique" });
       response.json({ error: "name must be unique" });
     } else {
-      persons.push(person);
+      notes.push(person);
       response.json(person);
     }
   }
 );
 
-const PORT = 3001;
+app.use(unknownEndpoint);
+
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
