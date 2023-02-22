@@ -73,7 +73,7 @@ app.put("/api/notes/:id", (request, response) => {
 
 app.get("/api/notes/:id", (request, response) => {
   const noteId = request.params.id;
-  const note = persons.find((findNote) => {
+  const note = notes.find((findNote) => {
     return findNote.id === Number(noteId);
   });
 
@@ -86,7 +86,7 @@ app.get("/api/notes/:id", (request, response) => {
 
 app.delete("/api/notes/:id", (request, response) => {
   const id = Number(request.params.id);
-  notes = persons.filter((note) => note.id !== id);
+  notes = notes.filter((note) => note.id !== id);
 
   response.status(204).end();
 });
