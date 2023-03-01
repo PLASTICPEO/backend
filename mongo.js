@@ -1,11 +1,13 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
+
+console.log(process.argv);
 
 if (process.argv.length < 3) {
   console.log("give password as argument");
   process.exit(1);
 }
 
-let password = "****";
+let password = process.argv[2];
 
 const url = `mongodb+srv://GioDavlasheridze:${password}@plastic-db.djoer9l.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -14,13 +16,15 @@ mongoose.connect(url);
 
 const noteSchema = new mongoose.Schema({
   content: String,
+  date: Date,
   important: Boolean,
 });
-
+console.log(process.argv);
 const Note = mongoose.model("Note", noteSchema);
 
 const note = new Note({
-  content: "HTML is Easy",
+  content: "Mongoose makes things is easy",
+  date: new Date(),
   important: true,
 });
 

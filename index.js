@@ -1,6 +1,30 @@
-import express, { request } from "express";
-import cors from "cors";
-import morgan from "morgan";
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const morgan = require("morgan");
+const Note = require("./models/note");
+const mongoose = require("mongoose");
+
+// DO NOT SAVE YOUR PASSWORD TO GITHUB!!
+
+const url = process.env.MONGODB_URI;
+
+mongoose.set("strictQuery", false);
+mongoose.connect(url);
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  important: Boolean,
+});
+
+noteSchema.set("toJSON", {
+  transform: (document, returnedObject) => {
+    console.log(document);
+    returnedObject.id = returnedObject._id.toString();
+    delete returnedObject._id;
+    delete returnedObject.__v;
+  },
+});
 
 const app = express();
 app.use(express.json());
@@ -11,7 +35,7 @@ const requestLogger = (request, response, next) => {
   console.log("Method:", request.method);
   console.log("Path:  ", request.path);
   console.log("Body:  ", request.body);
-  console.log("---");
+  console.log("Here we go :)");
   next();
 };
 
@@ -22,28 +46,28 @@ const unknownEndpoint = (request, response) => {
   }
 };
 
-let notes = [
-  {
-    id: 1,
-    content: "HTML is easy",
-    important: true,
-  },
-  {
-    id: 2,
-    content: "Browser can execute only JavaScript",
-    important: false,
-  },
-  {
-    id: 3,
-    content: "GET and POST are the most important methods of HTTP protocol",
-    important: true,
-  },
-  {
-    content: "JavaScrip is very good programming language",
-    important: true,
-    id: 4,
-  },
-];
+// let notes = [
+//   {
+//     id: 1,
+//     content: "HTML is easy",
+//     important: true,
+//   },
+//   {
+//     id: 2,
+//     content: "Browser can execute only JavaScript",
+//     important: false,
+//   },
+//   {
+//     id: 3,
+//     content: "GET and POST are the most important methods of HTTP protocol",
+//     important: true,
+//   },
+//   {
+//     content: "JavaScrip is very good programming language",
+//     important: true,
+//     id: 4,
+//   },
+// ];
 
 app.get("/", (request, response) => {
   response.send(`Hi from 3001 port`);
@@ -57,10 +81,13 @@ app.get("/info", (request, response) => {
 });
 
 app.get("/api/notes", (request, response) => {
-  response.send(notes);
+  Note.find({}).then((notes) => {
+    response.json(notes);
+  });
 });
 
 app.put("/api/notes/:id", (request, response) => {
+  console.log(request);
   notes = notes.map((note) => {
     if (note.id == request.body.id) {
       return request.body;
@@ -125,7 +152,7 @@ app.post(
 
 app.use(unknownEndpoint);
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
