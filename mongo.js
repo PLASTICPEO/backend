@@ -19,7 +19,7 @@ const noteSchema = new mongoose.Schema({
   date: Date,
   important: Boolean,
 });
-console.log(process.argv);
+
 const Note = mongoose.model("Note", noteSchema);
 
 const note = new Note({
