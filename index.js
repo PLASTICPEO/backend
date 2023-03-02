@@ -39,6 +39,7 @@ app.post("/api/notes", (request, response) => {
 
   const note = new Note({
     content: body.content,
+    date: new Date(),
     important: body.important || false,
   });
 
@@ -58,6 +59,7 @@ app.put("/api/notes/:id", (request, response, next) => {
 
   const note = {
     content: body.content,
+    date: new Date(),
     important: body.important,
   };
 
