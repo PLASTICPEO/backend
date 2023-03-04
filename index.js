@@ -1,7 +1,7 @@
-require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
+require("dotenv").config();
 
 const Note = require("./models/note");
 
@@ -39,13 +39,16 @@ app.post("/api/notes", (request, response) => {
 
   const note = new Note({
     content: body.content,
-    date: new Date(),
     important: body.important || false,
+    date: new Date(),
   });
 
-  note.save().then((savedNote) => {
-    response.json(savedNote);
-  });
+  note
+    .save()
+    .then((savedNote) => {
+      response.json(savedNote);
+    })
+    .catch((error) => next(error));
 });
 
 app.get("/api/notes/:id", (request, response) => {
@@ -59,7 +62,7 @@ app.put("/api/notes/:id", (request, response, next) => {
 
   const note = {
     content: body.content,
-    date: new Date(),
+    date: Date(),
     important: body.important,
   };
 
