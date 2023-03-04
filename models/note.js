@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 
 mongoose.set("strictQuery", false);
 
-const url = process.env.MONGODB_URI.toString();
+const url = process.env.MONGODB_URI;
 
-console.log("connecting to", url);
+console.log("Gio Check", url);
 
 mongoose
   .connect(url)

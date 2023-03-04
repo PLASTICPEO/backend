@@ -1,33 +1,31 @@
 const mongoose = require("mongoose");
 
-if (process.argv.length < 3) {
-  console.log("give password as argument");
-  process.exit(1);
-}
-
-let password = process.argv[2];
-
-const url = `mongodb+srv://GioDavlasheridze:${password}@plastic-db.djoer9l.mongodb.net/?retryWrites=true&w=majority`;
-
 mongoose.set("strictQuery", false);
-mongoose.connect(url);
+
+const url = process.env.MONGODB_URI;
+
+console.log("connecting to", url);
+
+mongoose
+  .connect(url)
+  .then((result) => {
+    console.log("connected to MongoDB");
+  })
+  .catch((error) => {
+    console.log("error connecting to MongoDB:", error.message);
+  });
 
 const noteSchema = new mongoose.Schema({
   content: String,
-  date: Date,
   important: Boolean,
 });
 
-const Note = mongoose.model("Note", noteSchema);
-
-// note.save().then((result) => {
-//   console.log("note saved!");
-//   mongoose.connection.close();
-// });
-
-Note.find({}).then((result) => {
-  result.forEach((note) => {
-    console.log(note);
-  });
-  mongoose.connection.close();
+noteSchema.set("toJSON", {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString();
+    delete returnedObject._id;
+    delete returnedObject.__v;
+  },
 });
+
+module.exports = mongoose.model("Note", noteSchema);
