@@ -1,7 +1,7 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
-require("dotenv").config();
 
 const Note = require("./models/note");
 
@@ -81,6 +81,7 @@ app.delete("/api/notes/:id", (request, response) => {
 app.use(unknownEndpoint);
 
 const PORT = process.env.PORT;
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

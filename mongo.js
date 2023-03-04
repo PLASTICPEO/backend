@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
 
-console.log(process.argv);
-
 if (process.argv.length < 3) {
   console.log("give password as argument");
   process.exit(1);
