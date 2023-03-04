@@ -18,6 +18,14 @@ const noteSchema = new mongoose.Schema({
   important: Boolean,
 });
 
+noteSchema.set("toJSON", {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString();
+    delete returnedObject._id;
+    delete returnedObject.__v;
+  },
+});
+
 const Note = mongoose.model("Note", noteSchema);
 
 const note = new Note({
@@ -26,14 +34,14 @@ const note = new Note({
   important: true,
 });
 
-// note.save().then((result) => {
-//   console.log("note saved!");
-//   mongoose.connection.close();
-// });
-
-Note.find({}).then((result) => {
-  result.forEach((note) => {
-    console.log(note);
-  });
+note.save().then((result) => {
+  console.log("note saved!");
   mongoose.connection.close();
 });
+
+// Note.find({}).then((result) => {
+//   result.forEach((note) => {
+//     console.log(note);
+//   });
+//   mongoose.connection.close();
+// });
